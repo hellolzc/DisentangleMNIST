@@ -1,5 +1,6 @@
 import random
 import os
+import argparse
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
@@ -84,21 +85,45 @@ def lr_scheduler_update(optimizer, step, init_lr=0.001, lr_decay_step=1000, step
     return optimizer, current_lr
 
 
+def get_model(config):
+    model_name = config['model']
+    if model_name == 'ModelED':
+        model = ModelED(config)
+    elif model_name == 'ModelNTI':
+        from model.model_sv import ModelNTI
+        model = ModelNTI(config)
+    else:
+        raise ValueError()
 
-if __name__ == '__main__':
-    ######################
-    # params             #
-    ######################
+    return model
+
+def get_loss_fn(config):
+    model_name = config['model']
+    if model_name == 'ModelED':
+        criterion = EncoderDecoderLoss()
+    elif model_name == 'ModelNTI':
+        criterion = EncoderDecoderLoss()
+    else:
+        raise ValueError()
+    return criterion
+
+
+def main(
+    config={'model':'ModelED'},
+    log_dir = './log/',
+    ckpt_dir = './ckpt/',
+):
+    os.makedirs(ckpt_dir, exist_ok=True)
+    os.makedirs(log_dir, exist_ok=True)
 
     image_root = os.path.join('./data/')
     image_size=28
-    ckpt_root = './log/'
 
     lr = 1e-2
 
     n_epoch = 50
     step_decay_weight = 0.95
-    lr_decay_step = 5000
+    lr_decay_step = 2000
     weight_decay = 1e-6
     grad_clip_thresh = 1.0
 
@@ -107,10 +132,11 @@ if __name__ == '__main__':
     #  load model, setup optimizer   #
     ##################################
 
-    my_net = ModelED(code_size=64).to(device)
+    my_net = get_model(config).to(device)
+    criterion = get_loss_fn(config).to(device)
+
     optimizer = optim.SGD(my_net.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
-    criterion = EncoderDecoderLoss().to(device)
-    logger = ExpLogger(ckpt_root)
+    logger = ExpLogger(log_dir)
 
     my_net.train()
 
@@ -119,7 +145,7 @@ if __name__ == '__main__':
     #############################
     # training network          #
     #############################
-    dataloader = prepare_dataloader(image_root, image_size)
+    dataloader = prepare_dataloader(image_root, batch_size=128, image_size=image_size)
 
     len_dataloader = len(dataloader)
 
@@ -137,7 +163,7 @@ if __name__ == '__main__':
 
             # Forward Backward
             my_net.zero_grad()
-            result = my_net(input_data=input_img)
+            result = my_net(input_data=input_img, number=class_label)
             ref_code, rec_img = result
 
             loss, target_mse = criterion(data_target, result)
@@ -146,7 +172,7 @@ if __name__ == '__main__':
 
             optimizer.step()
 
-            logger.log_training(loss, grad_norm, current_lr, current_step)
+            logger.log_training(loss.data.cpu().numpy(), grad_norm.data.cpu().numpy(), current_lr, current_step)
 
             current_step += 1
 
@@ -157,12 +183,36 @@ if __name__ == '__main__':
         )
 
         # print('step: %d, loss: %f' % (current_step, loss.cpu().data.numpy()))
-        torch.save(my_net.state_dict(), ckpt_root + '/sv_mnist_' + str(epoch) + '.pth')
+        torch.save(my_net.state_dict(), ckpt_dir + '/sv_mnist_' + str(epoch) + '.pth')
 
-        test(my_net, criterion, epoch, current_step, name='mnist_m', logger=logger)
+        test(my_net, criterion, epoch, current_step, name='mnist_m', logger=logger, log_dir=log_dir)
 
-    print( 'Done!')
 
+if __name__ == '__main__':
+    ######################
+    # params             #
+    ######################
+    parser = argparse.ArgumentParser(
+        description="Train Disentangle (See detail in train.py)."
+    )
+    parser.add_argument("--ckpt_dir", type=str, default="exp/untitled/ckpt",
+        required=False, help="Directory to save checkpoint"
+    )
+    parser.add_argument("--log_dir", type=str, default="exp/untitled/log",
+        required=False, help="Directory to save logs"
+    )
+    parser.add_argument("--model", type=str, default="ModelED",
+        required=False, help="model to train"
+    )
+
+    args = parser.parse_args()
+    config = {
+        'model':args.model,
+        'code_size': 128,
+        'n_class': 10,
+    }
+    main(config, args.log_dir, args.ckpt_dir)
+    print('Done!')
 
 
 

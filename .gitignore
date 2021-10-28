@@ -1,5 +1,6 @@
 data/*
 log/*
+exp/*
 
 __pycache__/
 *.py[cod]

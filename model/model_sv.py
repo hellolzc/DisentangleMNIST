@@ -35,6 +35,39 @@ class RefEncoder(nn.Module):
         return ref_code
 
 
+
+class Encoder(nn.Module):
+    """ Encoder """
+
+    def __init__(self,
+        n_symbol=10,
+        hidden_size=64,
+        code_size=100,
+    ):
+        super(Encoder, self).__init__()
+
+        self.src_word_emb = nn.Embedding(
+            n_symbol, hidden_size
+        )
+
+        self.encoder_fc = nn.Sequential()
+        self.encoder_fc.add_module('fc_sd1', nn.Linear(in_features=hidden_size, out_features=hidden_size))
+        self.encoder_fc.add_module('relu_sd1', nn.ReLU(True))
+        self.encoder_fc.add_module('fc_sd2', nn.Linear(in_features=hidden_size, out_features=code_size))
+        self.encoder_fc.add_module('relu_sd2', nn.ReLU(True))
+
+    def forward(self, src_seq):
+        batch_size = src_seq.shape[0]
+
+        # -- Forward
+        enc_output = self.src_word_emb(src_seq)
+
+        enc_output = self.encoder_fc(enc_output)
+
+        return enc_output
+
+
+
 class Decoder(nn.Module):
     """decoder"""
     def __init__(self, code_size=100):
@@ -71,13 +104,16 @@ class Decoder(nn.Module):
 
 
 class ModelED(nn.Module):
-    def __init__(self, code_size=100, n_class=10):
+    def __init__(self, config):
         super(ModelED, self).__init__()
+        code_size= config['code_size']  # 100, 
+        n_class  = config['n_class']  # 10
+
         self.ref_encoder = RefEncoder(code_size)
         self.decoder = Decoder(code_size)
 
 
-    def forward(self, input_data):
+    def forward(self, input_data=None, number='unused'):
         # ref encoder
         ref_code = self.ref_encoder(input_data)
         # decoder
@@ -87,6 +123,23 @@ class ModelED(nn.Module):
         return ref_code, rec_img
 
 
+class ModelNTI(nn.Module):
+    """Number to image"""
+    def __init__(self, config):
+        super(ModelNTI, self).__init__()
+        code_size= config['code_size']  # 100, 
+        n_class  = config['n_class']  # 10
 
+        self.encoder = Encoder(n_class, 64, code_size)
+        self.decoder = Decoder(code_size)
+
+    def forward(self, input_data='unused', number=None):
+        # encoder
+        emb_code = self.encoder(number)
+        # decoder
+        union_code = emb_code
+        rec_img = self.decoder(union_code)
+
+        return emb_code, rec_img
 
 

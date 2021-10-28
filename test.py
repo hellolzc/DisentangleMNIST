@@ -58,40 +58,27 @@ def prepare_val_dataloader(batch_size = 64, image_size = 28):
         dataset=dataset,
         batch_size=batch_size,
         shuffle=False,
-        num_workers=8
+        num_workers=1
     )
     return dataloader
 
 
 
-# def tr_image(img):
-#     img_new = (img + 1) / 2
-#     return img_new
-
-
-def test(model, criterion, epoch, step, name='MINIST-M', logger=None):
+def test(model, criterion, epoch, step, 
+        name='MINIST-M',
+        logger=None,
+        log_dir = './log/',
+    ):
 
     ###################
     # params          #
     ###################
     cuda = True
     cudnn.benchmark = True
-    ckpt_root = './log/'
 
     dataloader = prepare_val_dataloader()
 
-
-    ####################
-    # load model       #
-    ####################
-
     model.eval()
-    # model = model.to(device)
-
-    ####################
-    # transform image  #
-    ####################
-
 
     len_dataloader = len(dataloader)
     data_iter = iter(dataloader)
@@ -105,23 +92,24 @@ def test(model, criterion, epoch, step, name='MINIST-M', logger=None):
 
             batch_size = len(class_label)
 
-
-            result = model(input_data=input_img)
+            result = model(input_data=input_img, number=class_label)
             ref_code, rec_img = result
 
             loss, target_mse = criterion(data_input, result)
 
             if i == len_dataloader - 2:
-                vutils.save_image(input_img, ckpt_root + 'Epoch_%d_ori_image_all.png' % epoch, nrow=8)
-                vutils.save_image(rec_img, ckpt_root + 'Epoch_%d_rec_image_all.png' % epoch, nrow=8)
+                vutils.save_image(input_img, log_dir + '/Epoch_%d_ori_image_all.png' % epoch, nrow=8)
+                vutils.save_image(rec_img, log_dir + '/Epoch_%d_rec_image_all.png' % epoch, nrow=8)
 
             n_total += batch_size
 
-    print('Epoch: %d, Step %d, dataset: %s, total_loss: %f, rec_mse: %f' % (epoch, step, name, 
+    print('Validation Epoch: %d, Step %d, dataset: %s, total_loss: %f, rec_mse: %f' % (epoch, step, name, 
             loss.data.cpu().numpy(),
             target_mse.data.cpu().numpy(),
         )
     )
 
     if logger is not None:
-        logger.log_validation(loss, model, step)
+        logger.log_validation(loss.data.cpu().numpy(), model, step)
+
+    model.train()
