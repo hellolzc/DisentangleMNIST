@@ -109,7 +109,7 @@ def get_loss_fn(config):
 
 
 def main(
-    config={'model':'ModelED'},
+    config,
     log_dir = './log/',
     ckpt_dir = './ckpt/',
 ):
@@ -145,7 +145,7 @@ def main(
     #############################
     # training network          #
     #############################
-    dataloader = prepare_dataloader(image_root, batch_size=128, image_size=image_size)
+    dataloader = prepare_dataloader(image_root, batch_size=64, image_size=image_size)
 
     len_dataloader = len(dataloader)
 
@@ -176,8 +176,10 @@ def main(
 
             current_step += 1
 
-        print( 'loss total: %f,  mse: %f' \
-            % ( loss.data.cpu().numpy(),
+        print('Step: %d, Epoch %d, loss total: %f,  mse: %f' % ( 
+                current_step,
+                epoch,
+                loss.data.cpu().numpy(),
                 target_mse.data.cpu().numpy()
             )
         )
@@ -208,7 +210,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     config = {
         'model':args.model,
-        'code_size': 128,
+        'code_size': 64,
         'n_class': 10,
     }
     main(config, args.log_dir, args.ckpt_dir)
