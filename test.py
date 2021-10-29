@@ -1,67 +1,13 @@
 import os
+import torch
 import torch.backends.cudnn as cudnn
-import torch.utils.data
-from torchvision import transforms
-from torchvision import datasets
-import torchvision.utils as vutils
 
-from dataset.mnist_m import MNISTM
+
 from common.device_funcs import to_device
+from utils import prepare_val_dataloader, save_batch_results
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-def prepare_val_dataloader(batch_size = 64, image_size = 28):
-    ###################
-    # load data       #
-    ###################
-
-    img_transform = transforms.Compose([
-        transforms.Resize(image_size),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
-    ])
-    # gray2rgb_transform = transforms.Compose([
-    #     transforms.ToTensor(),
-    #     transforms.Lambda(lambda x: x.repeat(3,1,1)),
-    #     transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
-    # ])   # 修改的位置
-
-    
-    # if name == 'mnist':
-    #     mode = 'source'
-    #     image_root = './data/'
-    #     dataset = datasets.MNIST(
-    #         root=image_root,
-    #         train=False,
-    #         transform=gray2rgb_transform
-    #     )
-
-    #     dataloader = torch.utils.data.DataLoader(
-    #         dataset=dataset,
-    #         batch_size=batch_size,
-    #         shuffle=False,
-    #         num_workers=8
-    #     )
-
-    # elif name == 'mnist_m':
-
-    # mode = 'target'
-    image_root = './data/'
-    dataset = MNISTM(
-        root=image_root,
-        transform=img_transform,
-        train=False,
-    )
-
-    dataloader = torch.utils.data.DataLoader(
-        dataset=dataset,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=1
-    )
-    return dataloader
-
 
 
 def test(model, criterion, epoch, step, 
@@ -93,13 +39,12 @@ def test(model, criterion, epoch, step,
             batch_size = len(class_label)
 
             result = model(input_data=input_img, number=class_label)
-            ref_code, rec_img = result
+            # ref_code, rec_img = result
 
             loss, target_mse = criterion(data_input, result)
 
             if i == len_dataloader - 2:
-                vutils.save_image(input_img, log_dir + '/Epoch_%d_ori_image_all.png' % epoch, nrow=8)
-                vutils.save_image(rec_img, log_dir + '/Epoch_%d_rec_image_all.png' % epoch, nrow=8)
+                save_batch_results(log_dir, 'Epoch_%d' % epoch, data_input, result)
 
             n_total += batch_size
 

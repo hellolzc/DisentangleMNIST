@@ -113,17 +113,18 @@ class ModelST(nn.Module):
         union_code = emb_code + style_embs
         rec_img = self.decoder(union_code)
 
-        return emb_code, rec_img
+        return union_code, rec_img, weights, scores
 
 
 
-class ModelSVC(nn.Module):
-    """Number to image with style variation (Categorical)"""
+class ModelSV(nn.Module):
+    """Number to image with style variation (Categorical or Bernoulli)"""
     def __init__(self, config):
-        super(ModelSVC, self).__init__()
+        super(ModelSV, self).__init__()
         code_size= config['code_size']   # 100, 
         n_class  = config['n_class']     # 10
         token_num = config['token_num']  # 10
+        gumbel_activation = config['gumbel_activation']  # 'softmax' or 'sigmoid'
 
         self.encoder = Encoder(n_class, 64, code_size)
         self.decoder = Decoder(code_size)
@@ -134,7 +135,7 @@ class ModelSVC(nn.Module):
             gst_tokens=token_num,
             gst_heads=1,
             use_gumbel=True,
-            gumbel_activation='softmax',
+            gumbel_activation=gumbel_activation,
         )
 
     def forward(self, input_data='unused', number=None):
@@ -145,36 +146,7 @@ class ModelSVC(nn.Module):
         union_code = emb_code + style_embs
         rec_img = self.decoder(union_code)
 
-        return emb_code, rec_img
+        return union_code, rec_img, weights, scores
 
 
-class ModelSVB(nn.Module):
-    """Number to image with style variation (Bernoulli)"""
-    def __init__(self, config):
-        super(ModelSVB, self).__init__()
-        code_size= config['code_size']   # 100, 
-        n_class  = config['n_class']     # 10
-        token_num = config['token_num']  # 10
-
-        self.encoder = Encoder(n_class, 64, code_size)
-        self.decoder = Decoder(code_size)
-
-        self.style_encoder = StyleEncoder(
-            gst_token_dim=code_size,
-            ref_embed_dim=code_size,
-            gst_tokens=token_num,
-            gst_heads=1,
-            use_gumbel=True,
-            gumbel_activation='sigmoid',
-        )
-
-    def forward(self, input_data='unused', number=None):
-        # encoder
-        emb_code = self.encoder(number)
-        style_embs, weights, scores = self.style_encoder(input_data)
-        # decoder
-        union_code = emb_code + style_embs
-        rec_img = self.decoder(union_code)
-
-        return emb_code, rec_img
 

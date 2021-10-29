@@ -130,7 +130,7 @@ class ModelED(nn.Module):
         union_code = ref_code
         rec_img = self.decoder(union_code)
 
-        return ref_code, rec_img
+        return union_code, rec_img
 
 
 class ModelNTI(nn.Module):
@@ -150,6 +150,6 @@ class ModelNTI(nn.Module):
         union_code = emb_code
         rec_img = self.decoder(union_code)
 
-        return emb_code, rec_img
+        return union_code, rec_img
 
 

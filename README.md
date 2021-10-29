@@ -1,4 +1,4 @@
-## This is a pytorch implementation of the model [Domain Separation Networks](https://arxiv.org/abs/1608.06019)
+# A Implementation of Style Tokens on MNIST Dataset
 
 ## Environment
 - Pytorch >= 1.5
@@ -6,7 +6,7 @@
 
 ## Network Structure
 
-![model](./extra/model.jpg)
+![model](./extra/ModelSV.PNG)
 
 ## Usage
 
@@ -14,6 +14,13 @@
 
 ## Result
 
-![mnist](./extra/mnist.jpg)
+## Disentangle Methods
 
-![mnist_m](./extra/mnist_m.jpg)
+1. [Domain Separation Networks](https://arxiv.org/abs/1608.06019)
+2. MI
+3. Adversial
+
+## Acknowledgments
+
+Thanks to 
+

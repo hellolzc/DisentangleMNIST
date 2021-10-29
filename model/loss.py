@@ -14,11 +14,11 @@ class EncoderDecoderLoss(nn.Module):
 
 
     def forward(self, targets, predictions):
-        t_img, t_label = targets
-        ref_code, rec_img = predictions
+        t_img, t_label = targets[:2]
+        ref_code, rec_img = predictions[:2]
 
         rec_mse = self.alpha_weight * self.mse_loss(rec_img, t_img)
-        
+
         total_loss = (
             rec_mse + 0.0
         )

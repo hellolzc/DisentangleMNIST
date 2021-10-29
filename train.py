@@ -1,20 +1,14 @@
 import random
 import os
 import argparse
+import torch
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
-import torch.utils.data
-from torchvision import datasets
-from torchvision import transforms
 
-from dataset.mnist_m import MNISTM
-from model.model_ed import ModelED
-from model.loss import EncoderDecoderLoss
 from model.logger import ExpLogger
 from common.device_funcs import to_device
-from common.log_util import get_host_ip, get_hostname, get_cuda_version, get_python_version, log_summary
-from common.model_summary import model_summary
-from common.hparams import hparams_debug_string
+from common.hparams import create_hparams
+from utils import prepare_dataloader, get_model, get_loss_fn, log_exp
 from test import test
 
 manual_seed = random.randint(1, 10000)
@@ -25,53 +19,6 @@ torch.manual_seed(manual_seed)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 cuda = True
 cudnn.benchmark = True
-
-
-def prepare_dataloader(source_image_root, batch_size = 64, image_size = 28, ):
-    #######################
-    # load data           #
-    #######################
-
-    img_transform = transforms.Compose([
-        transforms.Resize(image_size),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
-    ])
-
-    # gray2rgb_transform = transforms.Compose([
-    #     transforms.ToTensor(),
-    #     transforms.Lambda(lambda x: x.repeat(3,1,1)),
-    #     transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
-    # ])   # 修改的位置
-
-    # dataset_source = datasets.MNIST(
-    #     root=source_image_root,
-    #     train=True,
-    #     transform=gray2rgb_transform
-    # )
-
-    # dataloader_source = torch.utils.data.DataLoader(
-    #     dataset=dataset_source,
-    #     batch_size=batch_size,
-    #     shuffle=True,
-    #     num_workers=8
-    # )
-
-    dataset_target = MNISTM(
-        root=source_image_root,
-        train=True,
-        transform=img_transform,
-        download=False,
-    )
-
-    dataloader_target = torch.utils.data.DataLoader(
-        dataset=dataset_target,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=8
-    )
-    return dataloader_target
-
 
 
 def lr_scheduler_update(optimizer, step, init_lr=0.001, lr_decay_step=1000, step_decay_weight=0.9):
@@ -86,36 +33,6 @@ def lr_scheduler_update(optimizer, step, init_lr=0.001, lr_decay_step=1000, step
         param_group['lr'] = current_lr
 
     return optimizer, current_lr
-
-
-def get_model(config):
-    model_name = config['model']
-    if model_name == 'ModelED':
-        model = ModelED(config)
-    elif model_name == 'ModelNTI':
-        from model.model_ed import ModelNTI
-        model = ModelNTI(config)
-    elif model_name == 'ModelST':
-        from model.model_st import ModelST
-        model = ModelST(config)
-    elif model_name == 'ModelSVC':
-        from model.model_st import ModelSVC
-        model = ModelSVC(config)
-    elif model_name == 'ModelSVB':
-        from model.model_st import ModelSVB
-        model = ModelSVB(config)
-    else:
-        raise ValueError()
-
-    return model
-
-def get_loss_fn(config):
-    model_name = config['model']
-    if model_name in ['ModelED', 'ModelNTI', 'ModelST', 'ModelSVC', 'ModelSVB']:
-        criterion = EncoderDecoderLoss()
-    else:
-        raise ValueError()
-    return criterion
 
 
 def main(
@@ -151,18 +68,7 @@ def main(
     my_net.train()
 
     # print(my_net)
-    log_summary(
-        os.path.join(log_dir, "summary.log"),
-        {
-            '\nHost Name': get_hostname(),
-            'Host IP': get_host_ip(),
-            'Python Version': get_python_version(),
-            'CUDA Version': get_cuda_version(),
-            'PyTorch Version': torch.__version__,
-            '\nModel': model_summary(my_net),
-            '\nConfig': hparams_debug_string(config),
-        }
-    )
+    log_exp(log_dir+'/../', my_net, config)
 
 
     #############################
@@ -187,7 +93,7 @@ def main(
             # Forward Backward
             my_net.zero_grad()
             result = my_net(input_data=input_img, number=class_label)
-            ref_code, rec_img = result
+            # ref_code, rec_img = result
 
             loss, target_mse = criterion(data_target, result)
             loss.backward()
@@ -210,7 +116,8 @@ def main(
         # print('step: %d, loss: %f' % (current_step, loss.cpu().data.numpy()))
         torch.save(my_net.state_dict(), ckpt_dir + '/sv_mnist_' + str(epoch) + '.pth')
 
-        test(my_net, criterion, epoch, current_step, name='mnist_m', logger=logger, log_dir=log_dir)
+        if epoch % 2 == 0:
+            test(my_net, criterion, epoch, current_step, name='mnist_m', logger=logger, log_dir=log_dir)
 
 
 if __name__ == '__main__':
@@ -226,17 +133,23 @@ if __name__ == '__main__':
     parser.add_argument("--log_dir", type=str, default="exp/untitled/log",
         required=False, help="Directory to save logs"
     )
-    parser.add_argument("--model", type=str, default="ModelED",
-        required=False, help="model to train"
+    # parser.add_argument("--model", type=str, default="ModelED",
+    #     required=False, help="model to train"
+    # )
+    parser.add_argument("--hparams", type=str, default="",
+        required=False, help="yaml style dict to update config"
     )
 
     args = parser.parse_args()
-    config = {
-        'model':args.model,
-        'code_size': 128,
-        'n_class': 10,
-        'token_num': 5,
-    }
+    config = create_hparams(
+        yaml_hparams_string=args.hparams,
+        debug_print=True,
+        allow_add=True,
+    )
+
+    print("LogDir:", args.log_dir)
+    print("CheckPointDir:", args.ckpt_dir)
+    print("Start Train.\n")
     main(config, args.log_dir, args.ckpt_dir)
     print('Done!')
 
