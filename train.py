@@ -8,10 +8,13 @@ from torchvision import datasets
 from torchvision import transforms
 
 from dataset.mnist_m import MNISTM
-from model.model_sv import ModelED
+from model.model_ed import ModelED
 from model.loss import EncoderDecoderLoss
-from model.device_funcs import to_device
 from model.logger import ExpLogger
+from common.device_funcs import to_device
+from common.log_util import get_host_ip, get_hostname, get_cuda_version, get_python_version, log_summary
+from common.model_summary import model_summary
+from common.hparams import hparams_debug_string
 from test import test
 
 manual_seed = random.randint(1, 10000)
@@ -90,8 +93,11 @@ def get_model(config):
     if model_name == 'ModelED':
         model = ModelED(config)
     elif model_name == 'ModelNTI':
-        from model.model_sv import ModelNTI
+        from model.model_ed import ModelNTI
         model = ModelNTI(config)
+    elif model_name == 'ModelST':
+        from model.model_st import ModelST
+        model = ModelST(config)
     else:
         raise ValueError()
 
@@ -99,9 +105,7 @@ def get_model(config):
 
 def get_loss_fn(config):
     model_name = config['model']
-    if model_name == 'ModelED':
-        criterion = EncoderDecoderLoss()
-    elif model_name == 'ModelNTI':
+    if model_name in ['ModelED', 'ModelNTI', 'ModelST']:
         criterion = EncoderDecoderLoss()
     else:
         raise ValueError()
@@ -140,7 +144,20 @@ def main(
 
     my_net.train()
 
-    print(my_net)
+    # print(my_net)
+    log_summary(
+        os.path.join(log_dir, "summary.log"),
+        {
+            '\nHost Name': get_hostname(),
+            'Host IP': get_host_ip(),
+            'Python Version': get_python_version(),
+            'CUDA Version': get_cuda_version(),
+            'PyTorch Version': torch.__version__,
+            '\nModel': model_summary(my_net),
+            '\nConfig': hparams_debug_string(config),
+        }
+    )
+
 
     #############################
     # training network          #
@@ -210,7 +227,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     config = {
         'model':args.model,
-        'code_size': 64,
+        'code_size': 128,
         'n_class': 10,
     }
     main(config, args.log_dir, args.ckpt_dir)

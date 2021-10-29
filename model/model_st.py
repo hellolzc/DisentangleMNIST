@@ -92,18 +92,24 @@ class ModelST(nn.Module):
     def __init__(self, config):
         super(ModelST, self).__init__()
         code_size= config['code_size']  # 100, 
-        n_class  = config['n_class']  # 10
+        n_class  = config['n_class']    # 10
 
         self.encoder = Encoder(n_class, 64, code_size)
         self.decoder = Decoder(code_size)
 
-        self.ref_encoder = RefEncoder(code_size)
+        self.style_encoder = StyleEncoder(
+            gst_token_dim=code_size,
+            ref_embed_dim=code_size,
+            gst_tokens=30,
+            gst_heads=1,
+        )
 
     def forward(self, input_data='unused', number=None):
         # encoder
         emb_code = self.encoder(number)
+        style_embs, weights, scores = self.style_encoder(input_data)
         # decoder
-        union_code = emb_code
+        union_code = emb_code + style_embs
         rec_img = self.decoder(union_code)
 
         return emb_code, rec_img

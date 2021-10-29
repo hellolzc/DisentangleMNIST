@@ -22,6 +22,11 @@ CUDA_VISIBLE_DEVICES=1 python train.py  --model 'ModelNTI' \
 #############################
 # Style Token               #
 #############################
+EXP_NAME='style_token'
+
+CUDA_VISIBLE_DEVICES=0 python train.py  --model 'ModelST' \
+    --ckpt_dir "./exp/${EXP_NAME}/ckpt" --log_dir "./exp/${EXP_NAME}/log"
+
 
 
 #############################

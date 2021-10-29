@@ -1,5 +1,5 @@
 import torch.nn as nn
-from functions import ReverseLayerF
+from .functions import ReverseLayerF
 
 
 class RefEncoder(nn.Module):

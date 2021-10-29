@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from functions import SIMSE, DiffLoss, MSE
+from .functions import SIMSE, DiffLoss, MSE
 
 
 class EncoderDecoderLoss(nn.Module):

@@ -6,7 +6,7 @@ from torchvision import datasets
 import torchvision.utils as vutils
 
 from dataset.mnist_m import MNISTM
-from model.device_funcs import to_device
+from common.device_funcs import to_device
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
