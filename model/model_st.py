@@ -125,6 +125,7 @@ class ModelSV(nn.Module):
         n_class  = config['n_class']     # 10
         token_num = config['token_num']  # 10
         gumbel_activation = config['gumbel_activation']  # 'softmax' or 'sigmoid'
+        gumbel_start_step = config['gumbel_start_step']  # 0
 
         self.encoder = Encoder(n_class, 64, code_size)
         self.decoder = Decoder(code_size)
@@ -136,6 +137,7 @@ class ModelSV(nn.Module):
             gst_heads=1,
             use_gumbel=True,
             gumbel_activation=gumbel_activation,
+            gumbel_start_step=gumbel_start_step,
         )
 
     def forward(self, input_data='unused', number=None):

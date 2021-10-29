@@ -16,11 +16,11 @@
 
 ## Disentangle Methods
 
-1. [Domain Separation Networks](https://arxiv.org/abs/1608.06019)
-2. MI
-3. Adversial
+1. DifferLoss from [Domain Separation Networks](https://arxiv.org/abs/1608.06019).
+2. Mutual Information
+3. Adversial mechanism
 
 ## Acknowledgments
 
-Thanks to 
+Thanks to fungtion/DSN: Pytorch implementation of Domain Separation Networks https://github.com/fungtion/DSN
 

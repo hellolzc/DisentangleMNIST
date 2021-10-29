@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
     print("LogDir:", args.log_dir)
     print("CheckPointDir:", args.ckpt_dir)
-    print("Start Train.\n")
+    print("Start Training.\n")
     main(config, args.log_dir, args.ckpt_dir)
     print('Done!')
 

@@ -44,6 +44,17 @@ code_size: 128
 n_class: 10
 token_num: 5
 gumbel_activation: 'sigmoid'
+gumbel_start_step: 0
+EOF
+
+EXP_NAME='style_variation_ber_g1s10k'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelSV
+code_size: 128
+n_class: 10
+token_num: 5
+gumbel_activation: 'sigmoid'
+gumbel_start_step: 10000
 EOF
 
 #######################################
@@ -56,6 +67,18 @@ code_size: 128
 n_class: 10
 token_num: 5
 gumbel_activation: 'softmax'
+gumbel_start_step: 0
+EOF
+
+
+EXP_NAME='style_variation_cat_g1s10k'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelSV
+code_size: 128
+n_class: 10
+token_num: 5
+gumbel_activation: 'softmax'
+gumbel_start_step: 10000
 EOF
 
 
@@ -64,6 +87,6 @@ EOF
 #######################################
 printf "EXP_NAME: %s\nEXTRA_HP:\n%s\n" "$EXP_NAME" "$EXTRA_HP"
 
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=0
 python train.py  --hparams "$EXTRA_HP" \
     --ckpt_dir "./exp/${EXP_NAME}/ckpt" --log_dir "./exp/${EXP_NAME}/log"
