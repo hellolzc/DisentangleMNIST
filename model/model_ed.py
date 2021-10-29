@@ -2,8 +2,6 @@ import torch.nn as nn
 from functions import ReverseLayerF
 
 
-
-
 class RefEncoder(nn.Module):
     """refference encoder"""
     def __init__(self, code_size=100):
@@ -29,6 +27,12 @@ class RefEncoder(nn.Module):
         self.ref_encoder_fc.add_module('ac_se3', nn.ReLU(True))
 
     def forward(self, input_data):
+        """
+        Args:
+            input_data (Tensor): Batch of images (B, channel, image_size, image_size). eg. (64, 3, 28, 28)
+        Returns:
+            ref_code (Tensor): Batch of embeddings (B, code_size).
+        """
         ref_feat = self.ref_encoder_conv(input_data)
         ref_feat = ref_feat.view(-1, 48 * 7 * 7)
         ref_code = self.ref_encoder_fc(ref_feat)
@@ -56,11 +60,17 @@ class Encoder(nn.Module):
         self.encoder_fc.add_module('fc_sd2', nn.Linear(in_features=hidden_size, out_features=code_size))
         self.encoder_fc.add_module('relu_sd2', nn.ReLU(True))
 
-    def forward(self, src_seq):
-        batch_size = src_seq.shape[0]
+    def forward(self, numbers):
+        """
+        Args:
+            number (Tensor): Batch of numbers (B, )
+        Returns:
+            enc_output (Tensor): Batch of embeddings (B, code_size).
+        """
+        batch_size = numbers.shape[0]
 
         # -- Forward
-        enc_output = self.src_word_emb(src_seq)
+        enc_output = self.src_word_emb(numbers)
 
         enc_output = self.encoder_fc(enc_output)
 
