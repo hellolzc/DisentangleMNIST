@@ -98,6 +98,12 @@ def get_model(config):
     elif model_name == 'ModelST':
         from model.model_st import ModelST
         model = ModelST(config)
+    elif model_name == 'ModelSVC':
+        from model.model_st import ModelSVC
+        model = ModelSVC(config)
+    elif model_name == 'ModelSVB':
+        from model.model_st import ModelSVB
+        model = ModelSVB(config)
     else:
         raise ValueError()
 
@@ -105,7 +111,7 @@ def get_model(config):
 
 def get_loss_fn(config):
     model_name = config['model']
-    if model_name in ['ModelED', 'ModelNTI', 'ModelST']:
+    if model_name in ['ModelED', 'ModelNTI', 'ModelST', 'ModelSVC', 'ModelSVB']:
         criterion = EncoderDecoderLoss()
     else:
         raise ValueError()
@@ -229,6 +235,7 @@ if __name__ == '__main__':
         'model':args.model,
         'code_size': 128,
         'n_class': 10,
+        'token_num': 5,
     }
     main(config, args.log_dir, args.ckpt_dir)
     print('Done!')

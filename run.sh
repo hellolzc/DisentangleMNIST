@@ -29,6 +29,18 @@ CUDA_VISIBLE_DEVICES=0 python train.py  --model 'ModelST' \
 
 
 
-#############################
-# Style Variation           #
-#############################
+#######################################
+# Style Variation Bernoulli           #
+#######################################
+EXP_NAME='style_variation_ber'
+
+CUDA_VISIBLE_DEVICES=0 python train.py  --model 'ModelSVB' \
+    --ckpt_dir "./exp/${EXP_NAME}/ckpt" --log_dir "./exp/${EXP_NAME}/log"
+
+#######################################
+# Style Variation Categorical         #
+#######################################
+EXP_NAME='style_variation_cat'
+
+CUDA_VISIBLE_DEVICES=0 python train.py  --model 'ModelSVB' \
+    --ckpt_dir "./exp/${EXP_NAME}/ckpt" --log_dir "./exp/${EXP_NAME}/log"
