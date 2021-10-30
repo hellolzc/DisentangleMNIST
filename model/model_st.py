@@ -150,5 +150,6 @@ class ModelSV(nn.Module):
 
         return union_code, rec_img, weights, scores
 
-
+    def set_step(self, global_step):
+        self.style_encoder.stl.mha.set_step(global_step)
 

@@ -47,14 +47,14 @@ gumbel_activation: 'sigmoid'
 gumbel_start_step: 0
 EOF
 
-EXP_NAME='style_variation_ber_g1s10k'
+EXP_NAME='style_variation_ber_g1s5k'
 read -r -d '' EXTRA_HP <<- EOF
 model: ModelSV
 code_size: 128
 n_class: 10
 token_num: 5
 gumbel_activation: 'sigmoid'
-gumbel_start_step: 10000
+gumbel_start_step: 5000
 EOF
 
 #######################################
@@ -71,14 +71,14 @@ gumbel_start_step: 0
 EOF
 
 
-EXP_NAME='style_variation_cat_g1s10k'
+EXP_NAME='style_variation_cat_g1s5k'
 read -r -d '' EXTRA_HP <<- EOF
 model: ModelSV
 code_size: 128
 n_class: 10
 token_num: 5
 gumbel_activation: 'softmax'
-gumbel_start_step: 10000
+gumbel_start_step: 5000
 EOF
 
 

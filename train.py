@@ -90,6 +90,9 @@ def main(
             data_target = to_device(data_target, device=device)
             input_img, class_label = data_target
 
+            if config["model"] in ['ModelSV',]:
+                my_net.set_step(current_step)
+            
             # Forward Backward
             my_net.zero_grad()
             result = my_net(input_data=input_img, number=class_label)
@@ -152,7 +155,6 @@ if __name__ == '__main__':
     print("Start Training.\n")
     main(config, args.log_dir, args.ckpt_dir)
     print('Done!')
-
-
+    print('Logs are saved at:', args.log_dir)
 
 

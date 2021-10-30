@@ -66,7 +66,7 @@ class MultiHeadedAttentionGumbel(nn.Module):
         self.gumbel_tau_func = gumbel_tau_func
         self.gumbel_activation = gumbel_activation
         assert gumbel_activation in ["softmax", "sigmoid"]
-        self.global_step = 0
+        self.global_step = -1
         self.tau = None
         self.set_step(0)
 
@@ -106,9 +106,13 @@ class MultiHeadedAttentionGumbel(nn.Module):
         if tau != self.tau:
             print(f"\n[Info @ {__name__}] tau is changed to {tau:.6f}")
         self.tau = tau
+        if self.global_step == self.gumbel_start_step:
+            print(f"\n[Info @ {__name__}] Gumbel Activation start at step {self.gumbel_start_step}.")
 
 
     def gumbel_softmax_func(self, scores, dim=-1):
+        if self.global_step < 0:
+            print("Warning: Use set step to update step.")
         if self.gumbel_activation == 'softmax':
             if self.global_step >= self.gumbel_start_step:
                 return gumbel_softmax(scores, self.tau, self.gumbel_hard)
