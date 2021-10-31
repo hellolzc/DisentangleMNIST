@@ -113,7 +113,7 @@ class ModelST(nn.Module):
         union_code = emb_code + style_embs
         rec_img = self.decoder(union_code)
 
-        return union_code, rec_img, weights, scores
+        return union_code, rec_img, weights, scores, style_embs, emb_code
 
 
 
@@ -148,7 +148,7 @@ class ModelSV(nn.Module):
         union_code = emb_code + style_embs
         rec_img = self.decoder(union_code)
 
-        return union_code, rec_img, weights, scores
+        return union_code, rec_img, weights, scores, style_embs, emb_code
 
     def set_step(self, global_step):
         self.style_encoder.stl.mha.set_step(global_step)

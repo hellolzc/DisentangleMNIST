@@ -163,6 +163,6 @@ def save_batch_results(output_dir, preffix, targets, predicts):
     vutils.save_image(rec_img, output_dir + '/%s_rec_image.png' % preffix, nrow=8)
     np.save(output_dir + '/%s_labels' % preffix, class_label.data.cpu().numpy().squeeze())
     if len(predicts) > 2:
-        weights, scores = predicts[2:]
+        weights, scores, style_embs, text_embs= predicts[2:]
         np.save(output_dir + '/%s_weights' % preffix, weights.data.cpu().numpy().squeeze())
         np.save(output_dir + '/%s_scores' % preffix, scores.data.cpu().numpy().squeeze())

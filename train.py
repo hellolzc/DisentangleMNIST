@@ -98,22 +98,28 @@ def main(
             result = my_net(input_data=input_img, number=class_label)
             # ref_code, rec_img = result
 
-            loss, target_mse = criterion(data_target, result)
+            loss, loss_dict = criterion(data_target, result)
             loss.backward()
             grad_norm = torch.nn.utils.clip_grad_norm_(my_net.parameters(), grad_clip_thresh)
 
             optimizer.step()
 
-            logger.log_training(loss.data.cpu().numpy(), grad_norm.data.cpu().numpy(), current_lr, current_step)
+            loss_dict = {
+                k: v.item() for k, v in loss_dict.items()
+            }
+            logger.log_training(
+                loss.item(), grad_norm.item(), current_lr, current_step,
+                scalar_dict=loss_dict
+            )
 
             current_step += 1
 
-        print('Step: %d, Epoch %d, loss total: %f,  mse: %f' % ( 
+        print('Step: %d, Epoch %d, total_loss: %.6f, ' % ( 
                 current_step,
                 epoch,
                 loss.data.cpu().numpy(),
-                target_mse.data.cpu().numpy()
-            )
+            ),
+            ' '.join(['%s: %.6f' % (k,v) for k, v in loss_dict.items()]),
         )
 
         # print('step: %d, loss: %f' % (current_step, loss.cpu().data.numpy()))

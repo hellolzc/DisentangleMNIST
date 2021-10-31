@@ -41,17 +41,19 @@ def test(model, criterion, epoch, step,
             result = model(input_data=input_img, number=class_label)
             # ref_code, rec_img = result
 
-            loss, target_mse = criterion(data_input, result)
+            loss, loss_dict = criterion(data_input, result)
 
             if i == len_dataloader - 2:
                 save_batch_results(log_dir, 'Epoch_%d' % epoch, data_input, result)
 
             n_total += batch_size
 
-    print('Validation Epoch: %d, Step %d, dataset: %s, total_loss: %f, rec_mse: %f' % (epoch, step, name, 
-            loss.data.cpu().numpy(),
-            target_mse.data.cpu().numpy(),
-        )
+    loss_dict = {
+        k: v.item() for k, v in loss_dict.items()
+    }
+    print(
+        'Validation Epoch: %d, Step %d, total_loss: %.6f, ' % (epoch, step, loss.item()),
+        ' '.join(['%s: %.6f' % (k,v) for k, v in loss_dict.items()]),
     )
 
     if logger is not None:
