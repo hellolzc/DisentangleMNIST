@@ -114,7 +114,7 @@ def main(
 
             current_step += 1
 
-        print('Step: %d, Epoch %d, total_loss: %.6f, ' % ( 
+        print('Step: %d, Epoch: %d, total_loss: %.6f, ' % ( 
                 current_step,
                 epoch,
                 loss.data.cpu().numpy(),

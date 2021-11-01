@@ -15,7 +15,7 @@ class EncoderDecoderLoss(nn.Module):
 
     def forward(self, targets, predictions):
         t_img, t_label = targets[:2]
-        ref_code, rec_img = predictions[:2]
+        uni_code, rec_img = predictions[:2]
 
         rec_mse = self.alpha_weight * self.mse_loss(rec_img, t_img)
 
@@ -34,7 +34,7 @@ class StyleDiffLoss(nn.Module):
     """ FastSpeech2 Loss """
 
     def __init__(self, config=None):
-        super(EncoderDecoderLoss, self).__init__()
+        super(StyleDiffLoss, self).__init__()
         self.mse_loss = nn.MSELoss()
         self.diff_loss = DiffLoss2()
         self.alpha_weight = 1.0
@@ -43,7 +43,7 @@ class StyleDiffLoss(nn.Module):
 
     def forward(self, targets, predictions):
         t_img, t_label = targets[:2]
-        ref_code, rec_img, style_embs, text_embs = predictions
+        uni_code, rec_img, weights, scores, style_embs, text_embs = predictions
 
         rec_mse = self.alpha_weight * self.mse_loss(rec_img, t_img)
         diff_loss = self.beta_weight * self.diff_loss(style_embs, text_embs)

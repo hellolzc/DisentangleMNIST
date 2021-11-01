@@ -132,11 +132,17 @@ def get_model(config):
     return model
 
 def get_loss_fn(config):
-    model_name = config['model']
-    if model_name in ['ModelED', 'ModelNTI', 'ModelST', 'ModelSV']:
+    if 'loss_fn' not in config:
         criterion = EncoderDecoderLoss()
     else:
-        raise ValueError()
+        loss_fn = config['loss_fn']
+        if loss_fn == 'EncoderDecoderLoss':
+            criterion = EncoderDecoderLoss()
+        elif loss_fn == 'StyleDiffLoss':
+            from model.loss import StyleDiffLoss
+            criterion = StyleDiffLoss(config)
+        else:
+            raise ValueError()
     return criterion
 
 def log_exp(log_dir, model, config):

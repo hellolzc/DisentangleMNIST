@@ -31,32 +31,41 @@ def test(model, criterion, epoch, step,
 
     with torch.no_grad():
         n_total = 0
+        total_loss_sum = 0.0
+        loss_dict_sum = {}
         for i in  range(len_dataloader):
             data_input = data_iter.next()
             data_input = to_device(data_input, device=device)
             input_img, class_label = data_input
-
             batch_size = len(class_label)
 
             result = model(input_data=input_img, number=class_label)
-            # ref_code, rec_img = result
-
             loss, loss_dict = criterion(data_input, result)
+
+            total_loss_sum += loss * batch_size
+            if loss_dict_sum is None:
+                loss_dict_sum = {
+                    k: v.item() * batch_size for k, v in loss_dict.items()
+                }
+            else:
+                for k in loss_dict_sum:
+                    loss_dict_sum[k] += loss_dict[k].item() * batch_size
 
             if i == len_dataloader - 2:
                 save_batch_results(log_dir, 'Epoch_%d' % epoch, data_input, result)
 
             n_total += batch_size
 
-    loss_dict = {
-        k: v.item() for k, v in loss_dict.items()
+    loss_mean = total_loss_sum / n_total
+    loss_dict_mean = {
+        k: v / n_total for k, v in loss_dict_sum.items()
     }
     print(
-        'Validation Epoch: %d, Step %d, total_loss: %.6f, ' % (epoch, step, loss.item()),
-        ' '.join(['%s: %.6f' % (k,v) for k, v in loss_dict.items()]),
+        'Step: %d, Epoch: %d, Validation on %d samples. total_loss: %.6f, ' % (step, epoch, n_total, loss_mean),
+        ' '.join(['%s: %.6f' % (k,v) for k, v in loss_dict_mean.items()]),
     )
 
     if logger is not None:
-        logger.log_validation(loss.data.cpu().numpy(), model, step)
+        logger.log_validation(loss_mean, model, step, scalar_dict=loss_dict)
 
     model.train()
