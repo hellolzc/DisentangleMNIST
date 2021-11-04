@@ -9,8 +9,10 @@ class EncoderDecoderLoss(nn.Module):
     def __init__(self, config=None):
         super(EncoderDecoderLoss, self).__init__()
         self.mse_loss = nn.MSELoss()
-        self.alpha_weight = 1.0
-        self.beta_weight = 1.0
+        if 'loss_weight_rec' in config:
+            self.alpha_weight = config['loss_weight_rec']
+        else:
+            self.alpha_weight = 1.0
 
 
     def forward(self, targets, predictions):
@@ -37,9 +39,9 @@ class StyleDiffLoss(nn.Module):
         super(StyleDiffLoss, self).__init__()
         self.mse_loss = nn.MSELoss()
         self.diff_loss = DiffLoss2()
-        if 'loss_alpha' in config:
-            self.alpha_weight = config['loss_alpha']
-            self.beta_weight = config['loss_beta']
+        if 'loss_weight_rec' in config:
+            self.alpha_weight = config['loss_weight_rec']
+            self.beta_weight = config['loss_weight_diff']
         else:
             self.alpha_weight = 1.0
             self.beta_weight = 1.0
