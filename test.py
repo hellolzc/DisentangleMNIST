@@ -32,7 +32,7 @@ def test(model, criterion, epoch, step,
     with torch.no_grad():
         n_total = 0
         total_loss_sum = 0.0
-        loss_dict_sum = {}
+        loss_dict_sum = None
         for i in  range(len_dataloader):
             data_input = data_iter.next()
             data_input = to_device(data_input, device=device)
@@ -66,6 +66,6 @@ def test(model, criterion, epoch, step,
     )
 
     if logger is not None:
-        logger.log_validation(loss_mean, model, step, scalar_dict=loss_dict)
+        logger.log_validation(loss_mean, model, step, scalar_dict=loss_dict_mean)
 
     model.train()
