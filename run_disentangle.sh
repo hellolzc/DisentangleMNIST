@@ -21,6 +21,18 @@ n_class: 10
 token_num: 5
 EOF
 
+
+EXP_NAME='style_token_diff_loss_beta1em6'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelST
+loss_fn: StyleDiffLoss
+code_size: 128
+n_class: 10
+token_num: 5
+loss_alpha: 1.0
+loss_beta: 1.0e-6
+EOF
+
 #######################################
 # Style Variation Bernoulli           #
 #######################################
@@ -44,6 +56,31 @@ n_class: 10
 token_num: 5
 gumbel_activation: 'sigmoid'
 gumbel_start_step: 5000
+EOF
+
+EXP_NAME='style_variation_ber_g1s5k_diff_loss'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelSV
+loss_fn: StyleDiffLoss
+code_size: 128
+n_class: 10
+token_num: 5
+gumbel_activation: 'sigmoid'
+gumbel_start_step: 5000
+EOF
+
+
+EXP_NAME='style_variation_ber_g1s5k_diff_loss_beta1em6'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelSV
+loss_fn: StyleDiffLoss
+code_size: 128
+n_class: 10
+token_num: 5
+gumbel_activation: 'sigmoid'
+gumbel_start_step: 5000
+loss_alpha: 1.0
+loss_beta: 1.0e-6
 EOF
 
 #######################################
@@ -70,6 +107,33 @@ n_class: 10
 token_num: 5
 gumbel_activation: 'softmax'
 gumbel_start_step: 5000
+EOF
+
+
+EXP_NAME='style_variation_cat_g1s5k_diff_loss'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelSV
+loss_fn: StyleDiffLoss
+code_size: 128
+n_class: 10
+token_num: 5
+gumbel_activation: 'softmax'
+gumbel_start_step: 5000
+EOF
+
+
+
+EXP_NAME='style_variation_cat_g1s5k_diff_beta1em6'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelSV
+loss_fn: StyleDiffLoss
+code_size: 128
+n_class: 10
+token_num: 5
+gumbel_activation: 'softmax'
+gumbel_start_step: 5000
+loss_alpha: 1.0
+loss_beta: 1.0e-6
 EOF
 
 

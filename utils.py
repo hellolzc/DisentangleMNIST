@@ -137,7 +137,7 @@ def get_loss_fn(config):
     else:
         loss_fn = config['loss_fn']
         if loss_fn == 'EncoderDecoderLoss':
-            criterion = EncoderDecoderLoss()
+            criterion = EncoderDecoderLoss(config)
         elif loss_fn == 'StyleDiffLoss':
             from model.loss import StyleDiffLoss
             criterion = StyleDiffLoss(config)
@@ -172,3 +172,5 @@ def save_batch_results(output_dir, preffix, targets, predicts):
         weights, scores, style_embs, text_embs= predicts[2:]
         np.save(output_dir + '/%s_weights' % preffix, weights.data.cpu().numpy().squeeze())
         np.save(output_dir + '/%s_scores' % preffix, scores.data.cpu().numpy().squeeze())
+        np.save(output_dir + '/%s_style_embs' % preffix, style_embs.data.cpu().numpy().squeeze())
+        np.save(output_dir + '/%s_text_embs' % preffix, text_embs.data.cpu().numpy().squeeze())

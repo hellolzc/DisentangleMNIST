@@ -37,19 +37,24 @@ class StyleDiffLoss(nn.Module):
         super(StyleDiffLoss, self).__init__()
         self.mse_loss = nn.MSELoss()
         self.diff_loss = DiffLoss2()
-        self.alpha_weight = 1.0
-        self.beta_weight = 1.0
+        if 'loss_alpha' in config:
+            self.alpha_weight = config['loss_alpha']
+            self.beta_weight = config['loss_beta']
+        else:
+            self.alpha_weight = 1.0
+            self.beta_weight = 1.0
 
 
     def forward(self, targets, predictions):
         t_img, t_label = targets[:2]
         uni_code, rec_img, weights, scores, style_embs, text_embs = predictions
 
-        rec_mse = self.alpha_weight * self.mse_loss(rec_img, t_img)
-        diff_loss = self.beta_weight * self.diff_loss(style_embs, text_embs)
+        rec_mse = self.mse_loss(rec_img, t_img)
+        diff_loss = self.diff_loss(style_embs, text_embs)
 
         total_loss = (
-            rec_mse + diff_loss
+            self.alpha_weight * rec_mse + \
+            self.beta_weight * diff_loss
         )
 
         return (
