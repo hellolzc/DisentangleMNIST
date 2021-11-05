@@ -12,7 +12,7 @@ n_class: 10
 token_num: 5
 EOF
 
-EXP_NAME='style_token_mi_loss'
+EXP_NAME='style_token_mi_beta1em2'
 read -r -d '' EXTRA_HP <<- EOF
 model: ModelST
 loss_fn: EncoderDecoderLoss
@@ -20,7 +20,7 @@ code_size: 128
 n_class: 10
 token_num: 5
 loss_weight_rec: 1.0
-loss_weight_mi: 1.0e-6
+loss_weight_mi: 1.0e-2
 use_mi: True
 mi_iters: 5
 EOF

@@ -43,7 +43,8 @@ def mi_first_forward(model, mi_net, optimizer_mi_net, data_target):
 
     input_img, class_label = data_target
 
-    _, _, weights, scores, style_embs, text_embs = model(input_data=input_img, number=class_label)
+    with torch.no_grad():
+        weights, scores, style_embs, text_embs = model.encode(input_data=input_img, number=class_label)
 
     x = style_embs.detach()
     y = text_embs.detach()
@@ -184,7 +185,8 @@ def main(
         torch.save(my_net.state_dict(), ckpt_dir + '/sv_mnist_' + str(epoch) + '.pth')
 
         if epoch % 2 == 0:
-            test(my_net, criterion, mi_net, epoch, current_step, name='mnist_m', logger=logger, log_dir=log_dir)
+            test(my_net, criterion, mi_net, epoch, current_step, 
+                name='mnist_m', logger=logger, log_dir=log_dir, mi_loss_weight=config['loss_weight_mi'])
 
 
 if __name__ == '__main__':

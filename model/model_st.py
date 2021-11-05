@@ -115,6 +115,12 @@ class ModelST(nn.Module):
 
         return union_code, rec_img, weights, scores, style_embs, text_embs
 
+    def encode(self, input_data='unused', number=None):
+        # encoder
+        text_embs = self.encoder(number)
+        style_embs, weights, scores = self.style_encoder(input_data)
+
+        return weights, scores, style_embs, text_embs
 
 
 class ModelSV(nn.Module):
@@ -149,6 +155,13 @@ class ModelSV(nn.Module):
         rec_img = self.decoder(union_code)
 
         return union_code, rec_img, weights, scores, style_embs, text_embs
+
+    def encode(self, input_data='unused', number=None):
+        # encoder
+        text_embs = self.encoder(number)
+        style_embs, weights, scores = self.style_encoder(input_data)
+
+        return weights, scores, style_embs, text_embs
 
     def set_step(self, global_step):
         self.style_encoder.stl.mha.set_step(global_step)
