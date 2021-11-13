@@ -21,7 +21,20 @@ n_class: 10
 token_num: 5
 loss_weight_rec: 1.0
 loss_weight_mi: 1.0e-2
-use_mi: True
+use_mi: True  # add mi_loss to total_loss
+mi_iters: 5
+EOF
+
+EXP_NAME='style_token_mi_beta1em2_notused'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelST
+loss_fn: EncoderDecoderLoss
+code_size: 128
+n_class: 10
+token_num: 5
+loss_weight_rec: 1.0
+loss_weight_mi: 1.0e-2
+use_mi: False  # add mi_loss to total_loss
 mi_iters: 5
 EOF
 

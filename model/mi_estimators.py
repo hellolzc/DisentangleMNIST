@@ -1,4 +1,6 @@
 '''
+Modified from: Wendison/VQMIVC: Official implementation of VQMIVC: One-shot (any-to-any) Voice Conversion @ Interspeech 2021 + Online playing demo!
+https://github.com/Wendison/VQMIVC
 Modified from: https://github.com/Linear95/CLUB
 '''
 

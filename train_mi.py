@@ -68,11 +68,12 @@ def mi_second_forward(my_net, optimizer, criterion, mi_net, data_target, config,
 
     loss, loss_dict = criterion(data_target, result)
 
+
+    _, _, weights, scores, style_embs, text_embs = result
+    mi_loss = mi_net.mi_est(style_embs, text_embs)
+    loss_dict['mi_loss'] = mi_loss
     if use_mi:
-        _, _, weights, scores, style_embs, text_embs = result
-        mi_loss = mi_net.mi_est(style_embs, text_embs)
         loss += mi_loss_weight * mi_loss
-        loss_dict['mi_loss'] = mi_loss
 
     loss.backward()
     grad_norm = torch.nn.utils.clip_grad_norm_(my_net.parameters(), grad_clip_thresh)
@@ -150,12 +151,11 @@ def main(
 
             if config["model"] in ['ModelSV',]:
                 my_net.set_step(current_step)
-            
-            if config["use_mi"]:
-                for j in range(config["mi_iters"]):
-                    lld_loss = mi_first_forward(my_net, mi_net, optimizer_mi, data_target)
-            else:
-                lld_loss = torch.tensor(0.)
+
+            for j in range(config["mi_iters"]):
+                lld_loss = mi_first_forward(my_net, mi_net, optimizer_mi, data_target)
+            # else: # config['use_mi'] = False
+            #     lld_loss = torch.tensor(0.)
             
             loss, loss_dict, grad_norm = mi_second_forward(
                 my_net, optimizer, criterion, mi_net, data_target, config,

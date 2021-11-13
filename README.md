@@ -18,6 +18,8 @@
 
 1. DifferLoss from [Domain Separation Networks](https://arxiv.org/abs/1608.06019).
 2. Mutual Information
+    - [Linear95/CLUB - CLUB: A Contrastive Log-ratio Upper Bound of Mutual Information](https://github.com/Linear95/CLUB)
+    - [Wendison/VQMIVC: Official implementation of VQMIVC](https://github.com/Wendison/VQMIVC)
 3. Adversial mechanism
 
 ## Acknowledgments

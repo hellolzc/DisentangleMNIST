@@ -44,11 +44,11 @@ def test(model, criterion, mi_net, epoch, step,
             result = model(input_data=input_img, number=class_label)
             loss, loss_dict = criterion(data_input, result)
 
+            _, _, weights, scores, style_embs, text_embs = result
+            mi_loss = mi_net.mi_est(style_embs, text_embs)
+            loss_dict['mi_loss'] = mi_loss
             if use_mi:
-                _, _, weights, scores, style_embs, text_embs = result
-                mi_loss = mi_net.mi_est(style_embs, text_embs)
                 loss += mi_loss_weight * mi_loss
-                loss_dict['mi_loss'] = mi_loss
 
             total_loss_sum += loss * batch_size
             if loss_dict_sum is None:
