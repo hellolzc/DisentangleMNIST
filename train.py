@@ -39,6 +39,8 @@ def main(
     config,
     log_dir = './log/',
     ckpt_dir = './ckpt/',
+    save_epoch = 2,
+    synth_epoch = 2,
 ):
     os.makedirs(ckpt_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
@@ -123,9 +125,10 @@ def main(
         )
 
         # print('step: %d, loss: %f' % (current_step, loss.cpu().data.numpy()))
-        torch.save(my_net.state_dict(), ckpt_dir + '/sv_mnist_' + str(epoch) + '.pth')
+        if epoch % save_epoch == 0:
+            torch.save(my_net.state_dict(), ckpt_dir + '/sv_mnist_' + str(epoch) + '.pth')
 
-        if epoch % 2 == 0:
+        if epoch % synth_epoch == 0:
             test(my_net, criterion, epoch, current_step, name='mnist_m', logger=logger, log_dir=log_dir)
 
 

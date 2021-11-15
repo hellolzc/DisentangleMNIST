@@ -87,3 +87,10 @@ printf "EXP_NAME: %s\nEXTRA_HP:\n%s\n" "$EXP_NAME" "$EXTRA_HP"
 export CUDA_VISIBLE_DEVICES=0
 python train.py  --hparams "$EXTRA_HP" \
     --ckpt_dir "./exp/${EXP_NAME}/ckpt" --log_dir "./exp/${EXP_NAME}/log"
+
+
+#######################################
+# Infer                               #
+#######################################
+python infer.py  --hparams "$EXTRA_HP" \
+    --ckpt_dir "./exp/${EXP_NAME}/ckpt" --epoch 48 --out_dir "./exp/${EXP_NAME}/result_48k"

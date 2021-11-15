@@ -93,6 +93,8 @@ def main(
     config,
     log_dir = './log/',
     ckpt_dir = './ckpt/',
+    save_epoch = 2,
+    synth_epoch = 2,
 ):
     os.makedirs(ckpt_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
@@ -102,7 +104,7 @@ def main(
 
     lr = 1e-2
 
-    n_epoch = 50
+    n_epoch = 100
     step_decay_weight = 0.95
     lr_decay_step = 2000
     weight_decay = 1e-6
@@ -152,10 +154,15 @@ def main(
             if config["model"] in ['ModelSV',]:
                 my_net.set_step(current_step)
 
+            lld_scalar = [0 for _ in range(config["mi_iters"])]
             for j in range(config["mi_iters"]):
                 lld_loss = mi_first_forward(my_net, mi_net, optimizer_mi, data_target)
+                lld_scalar[j] = lld_loss.item()
             # else: # config['use_mi'] = False
             #     lld_loss = torch.tensor(0.)
+            # with open(log_dir+'/lld.txt', 'a') as logf:
+            #     logf.write('Step: %d, Epoch: %d'% (current_step,  epoch) + str(lld_scalar) + '\n')
+            # print(lld_scalar)
             
             loss, loss_dict, grad_norm = mi_second_forward(
                 my_net, optimizer, criterion, mi_net, data_target, config,
@@ -182,9 +189,11 @@ def main(
         )
 
         # print('step: %d, loss: %f' % (current_step, loss.cpu().data.numpy()))
-        torch.save(my_net.state_dict(), ckpt_dir + '/sv_mnist_' + str(epoch) + '.pth')
+        if epoch % save_epoch == 0:
+            torch.save(my_net.state_dict(), ckpt_dir + '/sv_mnist_' + str(epoch) + '.pth')
+            torch.save(mi_net.state_dict(), ckpt_dir + '/sv_minet_' + str(epoch) + '.pth')
 
-        if epoch % 2 == 0:
+        if epoch % synth_epoch == 0:
             test(my_net, criterion, mi_net, epoch, current_step, 
                 name='mnist_m', logger=logger, log_dir=log_dir, mi_loss_weight=config['loss_weight_mi'])
 
