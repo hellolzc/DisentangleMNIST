@@ -94,3 +94,6 @@ python train.py  --hparams "$EXTRA_HP" \
 #######################################
 python infer.py  --hparams "$EXTRA_HP" \
     --ckpt_dir "./exp/${EXP_NAME}/ckpt" --epoch 48 --out_dir "./exp/${EXP_NAME}/result_48k"
+
+python infer.py  --hparams "$EXTRA_HP" \
+    --ckpt_dir "./exp/${EXP_NAME}/ckpt" --epoch 48 --out_dir "./exp/${EXP_NAME}/result_48k_random"  --random_text

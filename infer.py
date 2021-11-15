@@ -20,6 +20,7 @@ def infer(
     criterion,
     dataloader,
     out_dir = './result/',
+    random_text = False,
 ):
 
     ###################
@@ -37,14 +38,18 @@ def infer(
     with torch.no_grad():
         n_total = 0
         total_loss_sum = 0.0
-        loss_dict_sum = {}
+        loss_dict_sum = None
         for i in  range(len_dataloader):
             data_input = data_iter.next()
             input_img, class_label = data_input
             batch_size = len(class_label)
+            if random_text:
+                random_index = torch.randperm(batch_size).long()
+                class_label = class_label[random_index]
 
             input_img = to_device(input_img, device=device)
             class_label = to_device(class_label, device=device)
+            data_input = (input_img, class_label)
 
             result = model(input_data=input_img, number=class_label)
             loss, loss_dict = criterion(data_input, result)
@@ -97,6 +102,9 @@ if __name__ == '__main__':
     parser.add_argument("--hparams", type=str, default="",
         required=False, help="yaml style dict to update config"
     )
+    parser.add_argument("--random_text", action='store_true',
+        required=False, help="Use random number as input"
+    )
 
     args = parser.parse_args()
     config = create_hparams(
@@ -115,5 +123,5 @@ if __name__ == '__main__':
 
     dataloader = prepare_val_dataloader()
 
-    infer(my_net, criterion, dataloader, args.out_dir)
+    infer(my_net, criterion, dataloader, args.out_dir, random_text=args.random_text)
 
