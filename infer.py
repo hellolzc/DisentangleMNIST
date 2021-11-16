@@ -2,15 +2,18 @@
 # coding: utf-8
 import os
 import argparse
-
+import random
 import torch
 import torch.backends.cudnn as cudnn
 
 from common.hparams import create_hparams
 from common.device_funcs import to_device
-from utils import prepare_val_dataloader, save_batch_results
+from utils import prepare_val_dataloader, save_batch_results, add_label_to_imgs
 from utils import get_model, get_loss_fn
 
+manual_seed = 42  # random.randint(1, 10000)
+random.seed(manual_seed)
+torch.manual_seed(manual_seed)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = 'cpu'
@@ -65,6 +68,7 @@ def infer(
 
             # if i == len_dataloader - 2:
             save_batch_results(out_dir, 'Batch_%d' % i, data_input, result)
+            add_label_to_imgs(out_dir, 'Batch_%d' % i)
 
             n_total += batch_size
 

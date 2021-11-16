@@ -174,3 +174,34 @@ def save_batch_results(output_dir, preffix, targets, predicts):
         np.save(output_dir + '/%s_scores' % preffix, scores.data.cpu().numpy().squeeze())
         np.save(output_dir + '/%s_style_embs' % preffix, style_embs.data.cpu().numpy().squeeze())
         np.save(output_dir + '/%s_text_embs' % preffix, text_embs.data.cpu().numpy().squeeze())
+
+
+import matplotlib.font_manager as fm # to create font
+from PIL import Image,ImageFont,ImageDraw
+
+def add_label_to_imgs(output_dir, preffix):
+    img_path = os.path.join(output_dir, '%s_rec_image.png' % preffix)
+    label_path = os.path.join(output_dir, '%s_labels.npy' % preffix)
+
+    im = Image.open(img_path)
+    text = np.load(label_path)
+
+    # 创建Font对象:
+    # font = ImageFont.truetype('Arial.ttf', 36)
+    fontsize = 10
+    font = ImageFont.truetype(fm.findfont(fm.FontProperties(family='DejaVu Sans')),fontsize)
+
+    nrow=8
+    ncol = len(text)//nrow
+    shift = im.size[0]//nrow
+    draw = ImageDraw.Draw(im)
+    for i in range(nrow):
+        for j in range(ncol):
+            # print(text[i*8+j].item())
+            draw.text(
+                (i*shift+2, j*shift+1), 
+                str(text[i+j*8].item()), 
+                font=font, 
+                fill=(256,128,128)
+            )
+    im.save(img_path, 'png')
