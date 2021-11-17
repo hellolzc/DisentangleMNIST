@@ -31,7 +31,7 @@ read -r -d '' EXTRA_HP <<- EOF
 model: ModelST
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 EOF
 
 #######################################
@@ -42,7 +42,7 @@ read -r -d '' EXTRA_HP <<- EOF
 model: ModelSV
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'sigmoid'
 gumbel_start_step: 0
 EOF
@@ -52,7 +52,7 @@ read -r -d '' EXTRA_HP <<- EOF
 model: ModelSV
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'sigmoid'
 gumbel_start_step: 5000
 EOF
@@ -65,7 +65,7 @@ read -r -d '' EXTRA_HP <<- EOF
 model: ModelSV
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'softmax'
 gumbel_start_step: 0
 EOF
@@ -76,7 +76,7 @@ read -r -d '' EXTRA_HP <<- EOF
 model: ModelSV
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'softmax'
 gumbel_start_step: 5000
 EOF

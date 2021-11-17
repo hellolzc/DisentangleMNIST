@@ -133,7 +133,7 @@ def get_model(config):
 
 def get_loss_fn(config):
     if 'loss_fn' not in config:
-        criterion = EncoderDecoderLoss()
+        criterion = EncoderDecoderLoss(config)
     else:
         loss_fn = config['loss_fn']
         if loss_fn == 'EncoderDecoderLoss':
@@ -147,7 +147,7 @@ def get_loss_fn(config):
 
 def log_exp(log_dir, model, config):
     log_summary(
-        os.path.join(log_dir, "summary.log"),
+        os.path.join(log_dir, "summary.%d.log" % os.getpid()),
         {
             '\nHost Name': get_hostname(),
             'Host IP': get_host_ip(),

@@ -9,7 +9,7 @@ model: ModelST
 loss_fn: EncoderDecoderLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 EOF
 
 EXP_NAME='style_token_mi_beta1em2'
@@ -18,7 +18,7 @@ model: ModelST
 loss_fn: EncoderDecoderLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 loss_weight_rec: 1.0
 loss_weight_mi: 1.0e-2
 use_mi: True  # add mi_loss to total_loss
@@ -31,7 +31,7 @@ model: ModelST
 loss_fn: EncoderDecoderLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 loss_weight_rec: 1.0
 loss_weight_mi: 1.0e-2
 use_mi: False  # add mi_loss to total_loss
@@ -47,11 +47,26 @@ model: ModelSV
 loss_fn: EncoderDecoderLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'sigmoid'
 gumbel_start_step: 5000
 EOF
 
+
+EXP_NAME='style_variation_ber_g1s5k_mi_beta1em2'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelSV
+loss_fn: EncoderDecoderLoss
+code_size: 128
+n_class: 10
+token_num: 10
+gumbel_activation: 'sigmoid'
+gumbel_start_step: 5000
+loss_weight_rec: 1.0
+loss_weight_mi: 1.0e-2
+use_mi: False  # add mi_loss to total_loss
+mi_iters: 5
+EOF
 
 
 #######################################
@@ -63,11 +78,26 @@ model: ModelSV
 loss_fn: EncoderDecoderLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'softmax'
 gumbel_start_step: 5000
 EOF
 
+
+EXP_NAME='style_variation_cat_g1s5k_mi_beta1em2'
+read -r -d '' EXTRA_HP <<- EOF
+model: ModelSV
+loss_fn: EncoderDecoderLoss
+code_size: 128
+n_class: 10
+token_num: 10
+gumbel_activation: 'softmax'
+gumbel_start_step: 5000
+loss_weight_rec: 1.0
+loss_weight_mi: 1.0e-2
+use_mi: False  # add mi_loss to total_loss
+mi_iters: 5
+EOF
 
 
 

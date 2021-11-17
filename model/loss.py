@@ -6,7 +6,7 @@ from .functions import SIMSE, DiffLoss, MSE, DiffLoss2
 class EncoderDecoderLoss(nn.Module):
     """ FastSpeech2 Loss """
 
-    def __init__(self, config=None):
+    def __init__(self, config):
         super(EncoderDecoderLoss, self).__init__()
         self.mse_loss = nn.MSELoss()
         if 'loss_weight_rec' in config:
@@ -35,7 +35,7 @@ class EncoderDecoderLoss(nn.Module):
 class StyleDiffLoss(nn.Module):
     """ FastSpeech2 Loss """
 
-    def __init__(self, config=None):
+    def __init__(self, config):
         super(StyleDiffLoss, self).__init__()
         self.mse_loss = nn.MSELoss()
         self.diff_loss = DiffLoss2()

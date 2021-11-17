@@ -9,7 +9,7 @@ model: ModelST
 loss_fn: EncoderDecoderLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 EOF
 
 EXP_NAME='style_token_diff_beta1em6'
@@ -18,7 +18,7 @@ model: ModelST
 loss_fn: StyleDiffLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 loss_weight_rec: 1.0
 loss_weight_diff: 1.0e-6
 EOF
@@ -32,7 +32,7 @@ model: ModelSV
 loss_fn: EncoderDecoderLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'sigmoid'
 gumbel_start_step: 5000
 EOF
@@ -43,7 +43,7 @@ model: ModelSV
 loss_fn: StyleDiffLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'sigmoid'
 gumbel_start_step: 5000
 loss_weight_rec: 1.0
@@ -59,7 +59,7 @@ model: ModelSV
 loss_fn: EncoderDecoderLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'softmax'
 gumbel_start_step: 5000
 EOF
@@ -71,7 +71,7 @@ model: ModelSV
 loss_fn: StyleDiffLoss
 code_size: 128
 n_class: 10
-token_num: 5
+token_num: 10
 gumbel_activation: 'softmax'
 gumbel_start_step: 5000
 loss_weight_rec: 1.0
