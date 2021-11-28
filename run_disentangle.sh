@@ -97,3 +97,11 @@ python infer.py  --hparams "$EXTRA_HP" \
 
 python infer.py  --hparams "$EXTRA_HP" \
     --ckpt_dir "./exp/${EXP_NAME}/ckpt" --epoch 48 --out_dir "./exp/${EXP_NAME}/result_48k_random"  --random_text
+
+
+#######################################
+# Check                               #
+#######################################
+python train_clf.py  --hparams "$EXTRA_HP" \
+    --ckpt_dir "./exp/${EXP_NAME}_clf/ckpt" --log_dir "./exp/${EXP_NAME}_clf/log" \
+    --load_model "./exp/${EXP_NAME}/ckpt/sv_mnist_48.pth"
