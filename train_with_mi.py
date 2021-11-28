@@ -10,7 +10,7 @@ from common.device_funcs import to_device
 from common.hparams import create_hparams
 from utils import prepare_dataloader, get_model, get_loss_fn, log_exp
 from model.mi_estimators import CLUBSample
-from test_mi import test
+from test_with_mi import test
 
 manual_seed = random.randint(1, 10000)
 random.seed(manual_seed)
