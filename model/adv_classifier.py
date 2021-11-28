@@ -1,5 +1,11 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+
+
+def to_categorical_torch(y, num_classes):
+    """ 1-hot encodes a tensor """
+    return F.one_hot(y, num_classes)
 
 def binary_accuracy(Y_true, prediction):
     """calculate accuracy
@@ -32,14 +38,17 @@ class CLFLoss(nn.Module):
 
     def __init__(self, config):
         super(CLFLoss, self).__init__()
+        self.n_class = config['n_class']
         self.bce_loss = nn.BCEWithLogitsLoss()
 
     def forward(self, targets, predictions):
         t_img, t_label = targets[:2]
         pred_label, pred_linear = predictions[:2]
 
-        ce_loss = self.bce_loss(pred_linear, t_label)
-        accuracy = categorical_accuracy(t_label, pred_label)
+        t_label_categorical = to_categorical_torch(t_label, self.n_class)
+
+        ce_loss = self.bce_loss(pred_linear, t_label_categorical.float())
+        accuracy = categorical_accuracy(t_label_categorical, pred_label)
 
         total_loss = (
             ce_loss + 0.0
@@ -54,12 +63,11 @@ class CLFLoss(nn.Module):
         )
 
 
-class EmbClassifier(nn.Module):  # Sampled version of the CLUB estimator
+class EmbClassifier(nn.Module):
     '''
-        This class provides the sampled version of CLUB estimation to I(X,Y)
+        This class provides the adversarial classifier to embeddings
         Method:
             forward() :      provides the estimation with input samples  
-            loglikeli() :   provides the log-likelihood of the approximation q(Y|X) with input samples
         Arguments:
             x_dim, y_dim :         the dimensions of samples from X, Y respectively
             hidden_size :          the dimension of the hidden layer of the approximation network q(Y|X)
@@ -76,7 +84,7 @@ class EmbClassifier(nn.Module):  # Sampled version of the CLUB estimator
                                        nn.Linear(hidden_size//2, y_dim))
 
 
-    def forward(self, x_samples, y_samples):
+    def forward(self, x_samples, y_samples='unused'):
         y_linear = self.clf(x_samples)
         y = torch.softmax(y_linear, dim=1)
         return y, y_linear
