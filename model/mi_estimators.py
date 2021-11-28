@@ -52,9 +52,10 @@ class CLUB(nn.Module):  # CLUB: Mutual Information Contrastive Learning Upper Bo
 
         return (positive.sum(dim = -1) - negative.sum(dim = -1)).mean()
 
-    def loglikeli(self, x_samples, y_samples): # unnormalized loglikelihood
+    def negative_loglikeli(self, x_samples, y_samples): # unnormalized loglikelihood
         mu, logvar = self.get_mu_logvar(x_samples)
-        return (-(mu - y_samples)**2 /logvar.exp()-logvar).sum(dim=1).mean(dim=0)
+        # return (-(mu - y_samples)**2 /logvar.exp()-logvar).sum(dim=1).mean(dim=0)
+        return ((mu - y_samples)**2 /logvar.exp() + logvar).sum(dim=1).mean(dim=0)
 
 
 
@@ -144,12 +145,13 @@ class CLUBSample_reshape(nn.Module):  # Sampled version of the CLUB estimator
         return mu, logvar
 
 
-    def loglikeli(self, x_samples, y_samples):
+    def negative_loglikeli(self, x_samples, y_samples):
         mu, logvar = self.get_mu_logvar(x_samples)
         mu = mu.reshape(-1, mu.shape[-1]) # (bs, y_dim) -> (bs, 1, y_dim) -> (bs, T, y_dim) -> (bs*T, y_dim)
         logvar = logvar.reshape(-1, logvar.shape[-1])
         y_samples = y_samples.reshape(-1, y_samples.shape[-1]) # (bs, T, y_dim) -> (bs*T, y_dim)
-        return (-(mu - y_samples)**2 /logvar.exp()-logvar).sum(dim=1).mean(dim=0)
+        # return (-(mu - y_samples)**2 /logvar.exp()-logvar).sum(dim=1).mean(dim=0)
+        return ((mu - y_samples)**2 / logvar.exp() + logvar).sum(dim=1).mean(dim=0)
 
 
     def mi_est(self, x_samples, y_samples):
@@ -198,12 +200,13 @@ class CLUBSample_group(nn.Module):  # Sampled version of the CLUB estimator
         return mu, logvar
 
 
-    def loglikeli(self, x_samples, y_samples): # unnormalized loglikelihood
+    def negative_loglikeli(self, x_samples, y_samples): # unnormalized loglikelihood
         mu, logvar = self.get_mu_logvar(x_samples) # mu/logvar: (bs, y_dim)
         mu = mu.unsqueeze(1).expand(-1, y_samples.shape[1], -1).reshape(-1, mu.shape[-1]) # (bs, y_dim) -> (bs, 1, y_dim) -> (bs, T, y_dim) -> (bs*T, y_dim)
         logvar = logvar.unsqueeze(1).expand(-1, y_samples.shape[1], -1).reshape(-1, logvar.shape[-1])
         y_samples = y_samples.reshape(-1, y_samples.shape[-1]) # (bs, T, y_dim) -> (bs*T, y_dim)
-        return (-(mu - y_samples)**2 /logvar.exp()-logvar).sum(dim=1).mean(dim=0) / 2
+        # return (-(mu - y_samples)**2 /logvar.exp()-logvar).sum(dim=1).mean(dim=0) / 2
+        return ( (mu - y_samples)**2 /logvar.exp() + logvar).sum(dim=1).mean(dim=0) / 2
 
     def mi_est(self, x_samples, y_samples): # x_samples: (bs, x_dim); y_samples: (bs, T, y_dim)
         mu, logvar = self.get_mu_logvar(x_samples)
