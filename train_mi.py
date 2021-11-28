@@ -49,7 +49,7 @@ def mi_first_forward(model, mi_net, optimizer_mi_net, data_target):
     x = style_embs.detach()
     y = text_embs.detach()
 
-    lld_loss = - mi_net.loglikeli(x, y)
+    lld_loss = mi_net.negative_loglikeli(x, y)
     lld_loss.backward()
     optimizer_mi_net.step()
 
