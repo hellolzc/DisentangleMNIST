@@ -105,3 +105,8 @@ python infer.py  --hparams "$EXTRA_HP" \
 python train_clf.py  --hparams "$EXTRA_HP" \
     --ckpt_dir "./exp/${EXP_NAME}_clf/ckpt" --log_dir "./exp/${EXP_NAME}_clf/log" \
     --load_model "./exp/${EXP_NAME}/ckpt/sv_mnist_48.pth"
+
+
+python train_mi.py  --hparams "$EXTRA_HP" \
+    --ckpt_dir "./exp/${EXP_NAME}_mi_adam/ckpt" --log_dir "./exp/${EXP_NAME}_mi_adam/log" \
+    --load_model "./exp/${EXP_NAME}/ckpt/sv_mnist_48.pth"
