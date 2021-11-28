@@ -53,7 +53,7 @@ def clf_forward(model, clf_net, clf_criterion, optimizer_clf_net, data_target, g
     loss, loss_dict = clf_criterion(data_target, clf_output)
 
     loss.backward()
-    grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip_thresh)
+    grad_norm = torch.nn.utils.clip_grad_norm_(clf_net.parameters(), grad_clip_thresh)
 
     optimizer_clf_net.step()
 
@@ -129,7 +129,9 @@ def train_clf(
             data_target = data_iter.next()
             data_target = to_device(data_target, device=device)
 
+            # TODO: fix this bug
             if config["model"] in ['ModelSV',]:
+                assert False, 'Not support now'
                 my_net.set_step(current_step)
 
             loss, loss_dict, grad_norm = clf_forward(my_net, clf_net, clf_criterion, optimizer_clf, data_target, 
