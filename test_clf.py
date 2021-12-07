@@ -17,7 +17,7 @@ def clf_test_forward(model, clf_net, clf_criterion, data_target):
     input_img, class_label = data_target
 
     with torch.no_grad():
-        weights, scores, style_embs, text_embs = model.encode(input_data=input_img, number=class_label)
+        weights, scores, style_embs, text_embs, ref_embs = model.encode(input_data=input_img, number=class_label)
 
     x = style_embs.detach()
     y = class_label.detach()

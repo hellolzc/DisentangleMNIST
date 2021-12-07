@@ -37,16 +37,22 @@ def lr_scheduler_update(optimizer, step, init_lr=0.001, lr_decay_step=1000, step
 
 
 
-def mi_forward(model, mi_net, optimizer_mi_net, data_target, grad_clip_thresh=1.0):
+def mi_forward(model, mi_net, optimizer_mi_net, data_target, grad_clip_thresh=1.0, choose='PlanA|PlanB'):
     optimizer_mi_net.zero_grad()
 
     input_img, class_label = data_target
 
     with torch.no_grad():
-        weights, scores, style_embs, text_embs = model.encode(input_data=input_img, number=class_label)
+        weights, scores, style_embs, text_embs, ref_embs = model.encode(input_data=input_img, number=class_label)
 
-    x = style_embs.detach()
-    y = text_embs.detach()
+    if choose == 'PlanA':
+        x = style_embs.detach()
+        y = text_embs.detach()
+    elif choose == 'PlanB':
+        x = ref_embs.detach()
+        y = text_embs.detach()
+    else:
+        raise ValueError(choose)
 
     lld_loss = mi_net.negative_loglikeli(x, y)
 
@@ -95,6 +101,8 @@ def train_mie(
     weight_decay = 1e-6
     grad_clip_thresh = 1.0
 
+    adv_choose= config["adv_choose"]
+
     momentum = 0.9
     ##################################
     #  load model, setup optimizer   #
@@ -138,7 +146,7 @@ def train_mie(
                 my_net.set_step(current_step)
 
             loss, loss_dict, grad_norm = mi_forward(my_net, mi_net, optimizer_mi, data_target, 
-                                                    grad_clip_thresh=grad_clip_thresh)
+                                                    grad_clip_thresh=grad_clip_thresh, choose=adv_choose)
 
             loss_dict = {
                 k: v.item() for k, v in loss_dict.items()
@@ -164,7 +172,8 @@ def train_mie(
             torch.save(mi_net.state_dict(), ckpt_dir + '/mi_net_' + str(epoch) + '.pth')
 
         if epoch % synth_epoch == 0:
-            test(my_net, mi_net, epoch, current_step, 
+            test(my_net, mi_net, epoch, current_step,
+                choose=adv_choose,
                 name='mnist_m', logger=logger, log_dir=log_dir)
 
 

@@ -12,7 +12,7 @@ n_class: 10
 token_num: 10
 EOF
 
-EXP_NAME='style_token_mi_beta1em2'
+EXP_NAME='style_token_PlanB_mi_s8k_beta1em2'
 read -r -d '' EXTRA_HP <<- EOF
 model: ModelST
 loss_fn: EncoderDecoderLoss
@@ -23,22 +23,10 @@ loss_weight_rec: 1.0
 loss_weight_mi: 1.0e-2
 use_mi: True  # add mi_loss to total_loss
 mi_iters: 5
-mi_start_step = 8000
-adv_choose='PlanA'
+mi_start_step: 8000
+adv_choose: 'PlanB'
 EOF
 
-EXP_NAME='style_token_mi_beta1em2_notused'
-read -r -d '' EXTRA_HP <<- EOF
-model: ModelST
-loss_fn: EncoderDecoderLoss
-code_size: 128
-n_class: 10
-token_num: 10
-loss_weight_rec: 1.0
-loss_weight_mi: 1.0e-2
-use_mi: False  # add mi_loss to total_loss
-mi_iters: 5
-EOF
 
 #######################################
 # Style Variation Bernoulli           #
@@ -68,6 +56,8 @@ loss_weight_rec: 1.0
 loss_weight_mi: 1.0e-2
 use_mi: False  # add mi_loss to total_loss
 mi_iters: 5
+mi_start_step: 8000
+adv_choose: 'PlanB'
 EOF
 
 
@@ -86,7 +76,7 @@ gumbel_start_step: 5000
 EOF
 
 
-EXP_NAME='style_variation_cat_g1s5k_mi_beta1em2'
+EXP_NAME='style_variation_cat_g1s5k_mi_s8k_beta1em2'
 read -r -d '' EXTRA_HP <<- EOF
 model: ModelSV
 loss_fn: EncoderDecoderLoss
@@ -99,6 +89,8 @@ loss_weight_rec: 1.0
 loss_weight_mi: 1.0e-2
 use_mi: False  # add mi_loss to total_loss
 mi_iters: 5
+mi_start_step: 8000
+adv_choose: 'PlanB'
 EOF
 
 

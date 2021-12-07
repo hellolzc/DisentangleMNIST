@@ -36,18 +36,28 @@ def lr_scheduler_update(optimizer, step, init_lr=0.001, lr_decay_step=1000, step
     return optimizer, current_lr
 
 
+# MI 最小化
+# Plan A:  style_embs -> text_embs
+# Plan B:  ref_embs -> text_embs
+# Q(y|x), x,y方向可以交换
 
 
-def mi_first_forward(model, mi_net, optimizer_mi_net, data_target):
+def mi_first_forward(model, mi_net, optimizer_mi_net, data_target, choose='PlanA'):
     optimizer_mi_net.zero_grad()
 
     input_img, class_label = data_target
 
     with torch.no_grad():
-        weights, scores, style_embs, text_embs = model.encode(input_data=input_img, number=class_label)
+        weights, scores, style_embs, text_embs, ref_embs = model.encode(input_data=input_img, number=class_label)
 
-    x = style_embs.detach()
-    y = text_embs.detach()
+    if choose == 'PlanA':
+        x = style_embs.detach()
+        y = text_embs.detach()
+    elif choose == 'PlanB':
+        x = ref_embs.detach()
+        y = text_embs.detach()
+    else:
+        raise ValueError(choose)
 
     lld_loss = mi_net.negative_loglikeli(x, y)
     lld_loss.backward()
@@ -57,8 +67,8 @@ def mi_first_forward(model, mi_net, optimizer_mi_net, data_target):
 
 
 
-def mi_second_forward(my_net, optimizer, criterion, mi_net, data_target, config, grad_clip_thresh=1.0):
-    use_mi=config['use_mi']
+def mi_second_forward(my_net, optimizer, criterion, mi_net, data_target, config,
+                    grad_clip_thresh=1.0, choose='PlanA', use_mi_loss=True):
     mi_loss_weight= config['loss_weight_mi']
     # Forward Backward
     input_img, class_label = data_target
@@ -68,11 +78,20 @@ def mi_second_forward(my_net, optimizer, criterion, mi_net, data_target, config,
 
     loss, loss_dict = criterion(data_target, result)
 
+    _, _, weights, scores, style_embs, text_embs, ref_embs = result
 
-    _, _, weights, scores, style_embs, text_embs = result
-    mi_loss = mi_net.mi_est(style_embs, text_embs)
+    if choose == 'PlanA':
+        x = style_embs.detach()
+        y = text_embs.detach()
+    elif choose == 'PlanB':
+        x = ref_embs.detach()
+        y = text_embs.detach()
+    else:
+        raise ValueError(choose)
+
+    mi_loss = mi_net.mi_est(x, y)
     loss_dict['mi_loss'] = mi_loss
-    if use_mi:
+    if use_mi_loss:
         loss += mi_loss_weight * mi_loss
 
     loss.backward()
@@ -107,6 +126,9 @@ def main(
     n_epoch = 100
     step_decay_weight = 0.95
     lr_decay_step = 2000
+    mi_start_step = config["mi_start_step"]
+    adv_choose= config["adv_choose"]
+
     weight_decay = 1e-6
     grad_clip_thresh = 1.0
 
@@ -154,25 +176,39 @@ def main(
             if config["model"] in ['ModelSV',]:
                 my_net.set_step(current_step)
 
+            if current_step < mi_start_step:
+                use_mi_loss = False
+                mi_optimization = False
+            else:
+                if current_step == mi_start_step:
+                    print("MI Optimization Start at step %d" % current_step)
+                use_mi_loss=config['use_mi']
+                mi_optimization = True
+
+
             lld_scalar = [0 for _ in range(config["mi_iters"])]
-            for j in range(config["mi_iters"]):
-                lld_loss = mi_first_forward(my_net, mi_net, optimizer_mi, data_target)
-                lld_scalar[j] = lld_loss.item()
-            # else: # config['use_mi'] = False
-            #     lld_loss = torch.tensor(0.)
-            # with open(log_dir+'/lld.txt', 'a') as logf:
-            #     logf.write('Step: %d, Epoch: %d'% (current_step,  epoch) + str(lld_scalar) + '\n')
-            # print(lld_scalar)
+            if mi_optimization:
+                for j in range(config["mi_iters"]):
+                    lld_loss = mi_first_forward(my_net, mi_net, optimizer_mi, data_target, choose=adv_choose)
+                    lld_scalar[j] = lld_loss.item()
+                # else: # config['use_mi'] = False
+                #     lld_loss = torch.tensor(0.)
+                # with open(log_dir+'/lld.txt', 'a') as logf:
+                #     logf.write('Step: %d, Epoch: %d'% (current_step,  epoch) + str(lld_scalar) + '\n')
+                # print(lld_scalar)
             
             loss, loss_dict, grad_norm = mi_second_forward(
                 my_net, optimizer, criterion, mi_net, data_target, config,
-                grad_clip_thresh=grad_clip_thresh)
+                grad_clip_thresh=grad_clip_thresh,
+                use_mi_loss=use_mi_loss,
+                choose=adv_choose,
+            )
 
 
             loss_dict = {
                 k: v.item() for k, v in loss_dict.items()
             }
-            loss_dict['lld_loss'] = lld_loss.item()
+            loss_dict['lld_loss'] = lld_scalar[-1]
             logger.log_training(
                 loss.item(), grad_norm.item(), current_lr, current_step,
                 scalar_dict=loss_dict
@@ -195,7 +231,9 @@ def main(
 
         if epoch % synth_epoch == 0:
             test(my_net, criterion, mi_net, epoch, current_step, 
-                name='mnist_m', logger=logger, log_dir=log_dir, mi_loss_weight=config['loss_weight_mi'])
+                name='mnist_m', logger=logger, log_dir=log_dir,
+                mi_loss_weight=config['loss_weight_mi'], use_mi_loss=use_mi_loss,
+                choose=adv_choose)
 
 
 if __name__ == '__main__':

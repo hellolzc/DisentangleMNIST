@@ -11,8 +11,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def test(model, criterion, mi_net, epoch, step, 
-        use_mi=True,
+        use_mi_loss=True,
         mi_loss_weight=1.0,
+        choose='PlanA|PlanB',
         name='MINIST-M',
         logger=None,
         log_dir = './log/',
@@ -44,10 +45,19 @@ def test(model, criterion, mi_net, epoch, step,
             result = model(input_data=input_img, number=class_label)
             loss, loss_dict = criterion(data_input, result)
 
-            _, _, weights, scores, style_embs, text_embs = result
-            mi_loss = mi_net.mi_est(style_embs, text_embs)
+            _, _, weights, scores, style_embs, text_embs, ref_embs = result
+            if choose == 'PlanA':
+                x = style_embs.detach()
+                y = text_embs.detach()
+            elif choose == 'PlanB':
+                x = ref_embs.detach()
+                y = text_embs.detach()
+            else:
+                raise ValueError(choose)
+
+            mi_loss = mi_net.mi_est(x, y)
             loss_dict['mi_loss'] = mi_loss
-            if use_mi:
+            if use_mi_loss:
                 loss += mi_loss_weight * mi_loss
 
             total_loss_sum += loss * batch_size

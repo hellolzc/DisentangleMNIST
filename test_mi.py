@@ -13,15 +13,21 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 
-def mi_test_forward(model, mi_net, data_target):
+def mi_test_forward(model, mi_net, data_target, choose='PlanA|PlanB'):
 
     input_img, class_label = data_target
 
     with torch.no_grad():
-        weights, scores, style_embs, text_embs = model.encode(input_data=input_img, number=class_label)
+        weights, scores, style_embs, text_embs, ref_embs = model.encode(input_data=input_img, number=class_label)
 
-    x = style_embs.detach()
-    y = text_embs.detach()
+    if choose == 'PlanA':
+        x = style_embs.detach()
+        y = text_embs.detach()
+    elif choose == 'PlanB':
+        x = ref_embs.detach()
+        y = text_embs.detach()
+    else:
+        raise ValueError(choose)
 
     lld_loss = mi_net.negative_loglikeli(x, y)
     loss = lld_loss
@@ -36,7 +42,8 @@ def mi_test_forward(model, mi_net, data_target):
     return loss, loss_dict
 
 
-def test(encoder_model, mi_net, epoch, step, 
+def test(encoder_model, mi_net, epoch, step,
+        choose='PlanA|PlanB',
         name='MINIST-M',
         logger=None,
         log_dir = './log/',
@@ -65,7 +72,7 @@ def test(encoder_model, mi_net, epoch, step,
             input_img, class_label = data_input
             batch_size = len(class_label)
 
-            loss, loss_dict = mi_test_forward(encoder_model, mi_net, data_input)
+            loss, loss_dict = mi_test_forward(encoder_model, mi_net, data_input, choose=choose)
 
             # Sum Loss
             total_loss_sum += loss * batch_size

@@ -49,7 +49,7 @@ class StyleDiffLoss(nn.Module):
 
     def forward(self, targets, predictions):
         t_img, t_label = targets[:2]
-        uni_code, rec_img, weights, scores, style_embs, text_embs = predictions
+        uni_code, rec_img, weights, scores, style_embs, text_embs, ref_embs = predictions
 
         rec_mse = self.mse_loss(rec_img, t_img)
         diff_loss = self.diff_loss(style_embs, text_embs)
